@@ -96,8 +96,8 @@ class DocumentQAApp:
 
     def load_document(self):
         home = Path.home()
-        file_path = filedialog.askopenfilename(
-            title="Select Document",
+        file_paths = filedialog.askopenfilenames(
+            title="Select Document(s)",
             filetypes=[("PDF Files", "*.pdf"), ("Text Files", "*.txt")],
             initialdir=home
         )
@@ -106,13 +106,25 @@ class DocumentQAApp:
         self.ask_button.configure(state=DISABLED)
         self.question_entry.configure(state=DISABLED)
 
-        with open(file_path, "rb") as file:
-            uploaded_file = self.client.files.create(file=file, purpose="user_data")
-            self.vector_stores.append(self.client.vector_stores.create(file_ids=[uploaded_file.id]).id)
+        if len(file_paths) == 0:
+            self.file_label.config(text=f"No document(s) selected")
+            self.ask_button.configure(state=NORMAL)
+            self.question_entry.configure(state=NORMAL)
 
-        if file_path:
+            return
+
+        selected_files = ""
+
+        for file_path in file_paths:
+            with open(file_path, "rb") as file:
+                uploaded_file = self.client.files.create(file=file, purpose="user_data")
+                self.vector_stores.append(self.client.vector_stores.create(file_ids=[uploaded_file.id]).id)
+
             filename = os.path.basename(file_path)
-            self.file_label.config(text=f"Selected: {filename}")
+            selected_files += f"{filename}, "
+
+        self.file_label.config(text=f"Selected: {selected_files}")
+
         self.ask_button.configure(state=NORMAL)
         self.question_entry.configure(state=NORMAL)
 
@@ -187,7 +199,6 @@ class DocumentQAApp:
         self.answer_text.insert("end", "-" * 60 + "\n")
         self.answer_text.see("end")
         self.answer_text.configure(state="disabled")
-
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("dark")
