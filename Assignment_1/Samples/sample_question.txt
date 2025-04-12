@@ -1,0 +1,1 @@
+How do you appoint leader in a ring with anonymous processes?

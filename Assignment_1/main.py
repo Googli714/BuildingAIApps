@@ -89,7 +89,7 @@ class DocumentQAApp:
         self.LLM = os.environ.get("OPEN_AI_MODEL")
         self.chat_history = [
             {"role": "system",
-             "content": "You are an AI assistant that answers questions based on provided PDF documents or other types of documents. Always try to answer questions from the files and if it's not possible use your knowladge base. When answering from included PDF pages, include the page number that was used."}
+             "content": "You are an AI assistant that answers questions based on provided PDF documents or other types of documents. Always try to answer questions from the files and if it's not possible use your knowledge base. When answering from provided documents, include the name of the document and the page number that was used at the end of the answer."}
         ]
 
         self.question_entry.bind("<Return>", lambda event: self.answer_question())
