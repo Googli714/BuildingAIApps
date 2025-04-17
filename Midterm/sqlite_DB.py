@@ -86,8 +86,8 @@ class SQLiteDB:
 
 
 class VectorDB(SQLiteDB):
-    def __init__(self, collection_name: str):
-        super().__init__()
+    def __init__(self, db: str, collection_name: str):
+        super().__init__(database=db)
         self.collection_name = collection_name
 
     def create(self):

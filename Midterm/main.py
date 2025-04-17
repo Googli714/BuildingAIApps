@@ -8,12 +8,17 @@ from dotenv import load_dotenv
 import customtkinter as ctk
 from pathlib import Path
 
+from sqlite_DB import VectorDB
+from Helpers.pdf import store_pdf_to_db
+from Helpers.txt import store_txt_to_db
+
 load_dotenv()
 
 class DocumentQAApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("AI Document Q&A Assistant")
+        self.db = VectorDB(db="midterm.db", collection_name="vectors")
+        self.root.title("Semantic document search engine")
         self.root.geometry("800x600")
         self.root.minsize(600, 500)
 
@@ -117,8 +122,13 @@ class DocumentQAApp:
 
         for file_path in file_paths:
             with open(file_path, "rb") as file:
-                uploaded_file = self.client.files.create(file=file, purpose="user_data")
-                self.vector_stores.append(self.client.vector_stores.create(file_ids=[uploaded_file.id]).id)
+                extension = os.path.splitext(file_path)[1]
+                if extension == '.pdf':
+                    store_pdf_to_db(self.db, file_path)
+                elif extension == '.txt':
+                    store_txt_to_db(self.db, file_path)
+                else:
+                    print("no extension for you")
 
             filename = os.path.basename(file_path)
             selected_files += f"{filename}, "
