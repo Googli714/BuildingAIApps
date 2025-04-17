@@ -121,14 +121,13 @@ class DocumentQAApp:
         selected_files = ""
 
         for file_path in file_paths:
-            with open(file_path, "rb") as file:
-                extension = os.path.splitext(file_path)[1]
-                if extension == '.pdf':
-                    store_pdf_to_db(self.db, file_path)
-                elif extension == '.txt':
-                    store_txt_to_db(self.db, file_path)
-                else:
-                    print("no extension for you")
+            extension = os.path.splitext(file_path)[1]
+            if extension == '.pdf':
+                store_pdf_to_db(self.client, self.db, file_path)
+            elif extension == '.txt':
+                store_txt_to_db(self.client, self.db, file_path)
+            else:
+                print("no extension for you")
 
             filename = os.path.basename(file_path)
             selected_files += f"{filename}, "

@@ -1,6 +1,8 @@
 import io
+import os.path
 import sqlite3
 from typing import List, Tuple, Any
+from venv import create
 
 import numpy as np
 
@@ -70,7 +72,7 @@ class SQLiteDB:
         self.conn.commit()
 
     def _insert_data(self, table_name: str, data: List[Tuple[np.array, str, str]]):
-        self.cur.executemany(f"INSERT INTO {table_name} (arr, filename, text_content) VALUES (?, ?, ?, ?)", data)
+        self.cur.executemany(f"INSERT INTO {table_name} (arr, filename, text_content) VALUES (?, ?, ?)", data)
         # Commit changes
         self.conn.commit()
 
@@ -89,9 +91,15 @@ class VectorDB(SQLiteDB):
     def __init__(self, db: str, collection_name: str):
         super().__init__(database=db)
         self.collection_name = collection_name
+        self.create()
 
     def create(self):
-        self._create_table(self.collection_name)
+
+        sql = f'''SELECT name FROM sqlite_master WHERE type='table' AND name='{self.collection_name}' '''
+        self.cur.execute(sql)
+        res = self.cur.fetchall()
+        if len(res) == 0:
+            self._create_table(self.collection_name)
 
     def insert(self, data: List[Tuple[np.array, str, str]]):
         self._insert_data(self.collection_name, data)

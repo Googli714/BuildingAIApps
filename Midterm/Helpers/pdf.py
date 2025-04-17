@@ -21,7 +21,8 @@ def store_pdf_to_db(client: OpenAI, db: VectorDB, file_path: str):
     to_insert_to_db = []
 
     for chunk in chunks:
-        embedding = client.embeddings.create(input=chunk, model="text-embedding-ada-002")['data'][0]['embedding']
+        res = client.embeddings.create(input=chunk, model="text-embedding-ada-002")
+        embedding = res.data[0].embedding
         embedding = np.array(embedding)
         to_insert_to_db.append((embedding, filename, chunk))
 
