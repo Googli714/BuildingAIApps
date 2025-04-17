@@ -7,7 +7,6 @@ import PyPDF2
 from Midterm.Helpers.text import split_text_numpy
 from Midterm.sqlite_DB import VectorDB
 
-
 def store_pdf_to_db(client: OpenAI, db: VectorDB, file_path: str):
     text = ""
     filename = os.path.basename(file_path)
@@ -27,5 +26,4 @@ def store_pdf_to_db(client: OpenAI, db: VectorDB, file_path: str):
         to_insert_to_db.append((embedding, filename, chunk))
 
     db.insert(to_insert_to_db)
-
     return

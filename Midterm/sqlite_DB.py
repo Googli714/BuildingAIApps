@@ -1,8 +1,6 @@
 import io
-import os.path
 import sqlite3
 from typing import List, Tuple, Any
-from venv import create
 
 import numpy as np
 
@@ -27,7 +25,6 @@ def euclidean_distance(point1, point2):
     if point1.shape != point2.shape:
         raise ValueError("Input points must have the same shape.")
 
-    # Calculate the Euclidean distance
     distance = np.linalg.norm(point1 - point2)
 
     return distance
@@ -74,7 +71,6 @@ class SQLiteDB:
 
     def _insert_data(self, table_name: str, data: List[Tuple[np.array, str, str]]):
         self.cur.executemany(f"INSERT INTO {table_name} (arr, filename, text_content) VALUES (?, ?, ?)", data)
-        # Commit changes
         self.conn.commit()
 
     def _query_data(self, table_name: str, condition: str = None) -> List[Tuple]:
