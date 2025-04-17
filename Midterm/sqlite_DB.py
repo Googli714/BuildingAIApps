@@ -69,7 +69,7 @@ class SQLiteDB:
         self.cur.execute(sql)
         self.conn.commit()
 
-    def _insert_data(self, table_name: str, data: List[Tuple[np.array, str, str, str]]):
+    def _insert_data(self, table_name: str, data: List[Tuple[np.array, str, str]]):
         self.cur.executemany(f"INSERT INTO {table_name} (arr, filename, text_content) VALUES (?, ?, ?, ?)", data)
         # Commit changes
         self.conn.commit()
@@ -93,7 +93,7 @@ class VectorDB(SQLiteDB):
     def create(self):
         self._create_table(self.collection_name)
 
-    def insert(self, data: List[Tuple[np.array, str, str, str]]):
+    def insert(self, data: List[Tuple[np.array, str, str]]):
         self._insert_data(self.collection_name, data)
 
     def search(self, query: np.array, num_results: int):
