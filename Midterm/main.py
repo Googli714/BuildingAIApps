@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import filedialog, ttk
 from tkinter.constants import DISABLED, NORMAL
 
+import numpy as np
 from openai import OpenAI
 from dotenv import load_dotenv
 import customtkinter as ctk
@@ -94,7 +95,7 @@ class DocumentQAApp:
         self.LLM = os.environ.get("OPEN_AI_MODEL")
         self.chat_history = [
             {"role": "system",
-             "content": "You are an AI assistant that answers questions based on provided PDF documents or other types of documents. Always try to answer questions from the files and if it's not possible use your knowledge base. When answering from provided documents, include the name of the document and the page number that was used at the end of the answer."}
+             "content": "You are a semantic document search engine that answers questions based on provided PDF documents or other types of documents. Always try to answer questions from the files and if it's not possible use your knowledge base. When answering from provided documents, include the name of the document and the page number that was used at the end of the answer."}
         ]
 
         self.question_entry.bind("<Return>", lambda event: self.answer_question())
@@ -138,25 +139,20 @@ class DocumentQAApp:
         self.question_entry.configure(state=NORMAL)
 
     def retrieve_relevant_contexts(self, query, top_k=0.3):
-        responses = []
 
-        for vector_store in self.vector_stores:
-            response = self.client.vector_stores.search(
-                vector_store_id=vector_store,
-                query=query,
-            )
-            responses.append(response)
+        res = self.client.embeddings.create(input=query, model="text-embedding-ada-002")
+        embedding = res.data[0].embedding
+        embedding = np.array(embedding)
+
+        relevant_docs = self.db.search(embedding, 3)
 
         top_docs = []
 
-        for response in responses:
-            for data in response.data:
-                if data.score >= top_k:
-                    for content in data.content:
-                        top_docs.append({
-                            'content': content.text,
-                            'source': data.filename
-                        })
+        for doc in relevant_docs:
+            top_docs.append({
+                'content': doc[3],
+                'source': doc[2]
+            })
 
         return top_docs
 

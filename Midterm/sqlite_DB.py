@@ -36,7 +36,8 @@ def get_nearest_neighbor(train, test_row, num_neighbors: int = 1):
     distances = []
 
     for train_row in train:
-        dist = euclidean_distance(test_row, train_row)
+        vec = train_row[0]
+        dist = euclidean_distance(test_row, vec)
         distances.append((train_row, dist))
 
     distances.sort(key=lambda tup: tup[1])
@@ -106,5 +107,4 @@ class VectorDB(SQLiteDB):
 
     def search(self, query: np.array, num_results: int):
         vectors = self._query_data(self.collection_name)
-        vectors = [vector[0] for vector in vectors]
         return get_nearest_neighbor(vectors, query, num_results)
