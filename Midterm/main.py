@@ -88,7 +88,6 @@ class DocumentQAApp:
         self.file_label = ttk.Label(self.doc_frame, text="No document selected")
         self.file_label.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
 
-
         self.vector_stores = []
 
         self.client = OpenAI()
@@ -140,7 +139,7 @@ class DocumentQAApp:
 
     def retrieve_relevant_contexts(self, query, top_k=0.3):
 
-        res = self.client.embeddings.create(input=query, model="text-embedding-ada-002")
+        res = self.client.embeddings.create(input=query, model="text-embedding-3-large")
         embedding = res.data[0].embedding
         embedding = np.array(embedding)
 
