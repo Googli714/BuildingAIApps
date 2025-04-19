@@ -3,6 +3,7 @@ import sqlite3
 from typing import List, Tuple, Any
 
 import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 def adapt_array(arr):
     """
@@ -20,31 +21,6 @@ def convert_array(text):
     out = io.BytesIO(text)
     out.seek(0)
     return np.load(out)  # noqa
-
-def euclidean_distance(point1, point2):
-    if point1.shape != point2.shape:
-        raise ValueError("Input points must have the same shape.")
-
-    distance = np.linalg.norm(point1 - point2)
-
-    return distance
-
-def get_nearest_neighbor(train, test_row, num_neighbors: int = 1):
-    distances = []
-
-    for train_row in train:
-        vec = train_row[0]
-        dist = euclidean_distance(test_row, vec)
-        distances.append((train_row, dist))
-
-    distances.sort(key=lambda tup: tup[1])
-    neighbors = []
-
-    for i in range(num_neighbors):
-        neighbors.append(distances[i][0])
-
-    return neighbors
-
 
 sqlite3.register_adapter(np.ndarray, adapt_array)
 
@@ -101,6 +77,21 @@ class VectorDB(SQLiteDB):
     def insert(self, data: List[Tuple[np.array, str, str]]):
         self._insert_data(self.collection_name, data)
 
-    def search(self, query: np.array, num_results: int):
-        vectors = self._query_data(self.collection_name)
-        return get_nearest_neighbor(vectors, query, num_results)
+    def search(self, query: np.array, top_k: int = 3):
+        rows = self._query_data(self.collection_name)
+
+        similarities = []
+        for row in rows:
+            similarity = cosine_similarity(
+                [query],
+                [row[0]]
+            )[0][0]
+            similarities.append(similarity)
+
+        top_indices = np.argsort(similarities)[-top_k:][::-1]
+
+        top_docs = []
+        for idx in top_indices:
+            top_docs.append(rows[idx])
+
+        return top_docs

@@ -138,7 +138,6 @@ class DocumentQAApp:
         self.question_entry.configure(state=NORMAL)
 
     def retrieve_relevant_contexts(self, query, top_k=0.3):
-
         res = self.client.embeddings.create(input=query, model="text-embedding-3-large")
         embedding = res.data[0].embedding
         embedding = np.array(embedding)
