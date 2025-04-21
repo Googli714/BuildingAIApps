@@ -7,6 +7,22 @@ from Midterm.Helpers.text import split_text_numpy
 from Midterm.sqlite_DB import VectorDB
 
 def store_txt_to_db(client: OpenAI, db: VectorDB, file_path: str):
+    """
+    Extracts contents from text file, splits it into chunks, generates embeddings for each chunk,
+    and stores the embeddings, filename, and corresponding text chunks into a vector database.
+
+    Args:
+        client (OpenAI):
+            An OpenAI client instance used to generate text embeddings.
+        db (VectorDB):
+            A vector database instance where the embeddings and associated data will be stored.
+        file_path (str):
+            The path to the PDF file to be processed.
+
+    Returns:
+        None
+    """
+
     text = ""
     filename = os.path.basename(file_path)
     with open(file_path, 'rb') as file:
