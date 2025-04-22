@@ -24,7 +24,7 @@ class DocumentQAApp(QMainWindow):
         self.db = VectorDB(db="midterm.db", collection_name="vectors")
         
         # Setup OpenAI client ( DO NOT FORGET TO PUT IN YOUR API KEY AND MODEL)
-        self.client = OpenAI(api_key="YOUR_KEY_HERE")
+        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
         self.LLM = os.environ.get("OPEN_AI_MODEL") # "gpt-3.5-turbo" # example
         self.chat_history = [
             {"role": "system",
@@ -247,7 +247,7 @@ class DocumentQAApp(QMainWindow):
         Encapsulates the flow of what the app does when a user asks a question.
         :return:
         """
-        question = self.question_entry.get().strip()
+        question = self.question_entry.text().strip()
 
         if not question:
             return
@@ -268,13 +268,14 @@ class DocumentQAApp(QMainWindow):
             self.answer_text.ensureCursorVisible()
     
     def display_answer(self, question, answer):
-       """
+        """
         Updates interface to display the answer for the inputted question
         :param question: User question.
         :param answer: Answer by AI model
         :return:
         """
         current_text = self.answer_text.toPlainText()
+
         if current_text.endswith("Thinking...\n"):
             text_lines = current_text.split('\n')
             if len(text_lines) >= 2:

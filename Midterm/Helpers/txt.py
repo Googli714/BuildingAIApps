@@ -3,8 +3,8 @@ import os
 import numpy as np
 from openai import OpenAI
 
-from BuildingAIApps.Midterm.Helpers.text import split_text_numpy
-from BuildingAIApps.Midterm.sqlite_DB import VectorDB
+from Midterm.Helpers.text import split_text_numpy
+from Midterm.sqlite_DB import VectorDB
 
 def store_txt_to_db(client: OpenAI, db: VectorDB, file_path: str):
     """
