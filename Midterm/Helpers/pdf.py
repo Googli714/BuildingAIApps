@@ -7,7 +7,6 @@ import PyPDF2
 from BuildingAIApps.Midterm.Helpers.text import split_text_numpy
 from BuildingAIApps.Midterm.sqlite_DB import VectorDB
 
-
 def store_pdf_to_db(client: OpenAI, db: VectorDB, file_path: str):
     """
     Extracts text from a PDF file, splits it into chunks, generates embeddings for each chunk,

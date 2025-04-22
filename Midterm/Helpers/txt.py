@@ -25,7 +25,7 @@ def store_txt_to_db(client: OpenAI, db: VectorDB, file_path: str):
 
     text = ""
     filename = os.path.basename(file_path)
-    with open(file_path, 'rb') as file:
+    with open(file_path, 'r+') as file:
         text += file.read()
 
     chunks = split_text_numpy(text)
