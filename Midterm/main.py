@@ -147,6 +147,13 @@ class DocumentQAApp(QMainWindow):
         """)
     
     def load_document(self):
+        """
+        Allows user to pick a document and load it,
+        Extracts the text and stores the document chunks in the
+        database. Accepts only PDF or TXT files.
+
+        :return:
+        """
         home = Path.home()
         file_paths, _ = QFileDialog.getOpenFileNames(
             self,
@@ -184,13 +191,22 @@ class DocumentQAApp(QMainWindow):
         self.ask_button.setEnabled(True)
         self.question_entry.setEnabled(True)
     
-    def retrieve_relevant_contexts(self, query, top_k=0.3):
+    def retrieve_relevant_contexts(self, query, top_k= 3):
+        """
+        Retrieves the most relevant chunks from the database
+
+        :param query: Input question from the user
+        :param top_k:
+        :return: A list of relevant document chunks, each containing:
+            - 'content' (str): The text content of the chunk.
+            - 'source' (str): The filename and page number.
+        """
         res = self.client.embeddings.create(input=query, model="text-embedding-3-large")
         embedding = res.data[0].embedding
         embedding = np.array(embedding)
-        
-        relevant_docs = self.db.search(embedding, 3)
-        
+
+        relevant_docs = self.db.search(embedding, top_k)
+
         top_docs = []
         
         for doc in relevant_docs:
@@ -202,6 +218,13 @@ class DocumentQAApp(QMainWindow):
         return top_docs
     
     def generate_answer(self, query, relevant_docs):
+        """
+         Generates an answer to the user's question using the provided document context.
+
+        :param query: The user's question.
+        :param relevant_docs:  List of relevant document chunks retrieved from the database
+        :return: The generated answer from the language model.
+        """
         context = "\n\n---\n\n".join([f"From {doc['source']}:\n{doc['content']}" for doc in relevant_docs])
         message = {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {query}"}
         
@@ -220,8 +243,12 @@ class DocumentQAApp(QMainWindow):
         return answer
     
     def answer_question(self):
-        question = self.question_entry.text().strip()
-        
+        """
+        Encapsulates the flow of what the app does when a user asks a question.
+        :return:
+        """
+        question = self.question_entry.get().strip()
+
         if not question:
             return
         
@@ -241,6 +268,12 @@ class DocumentQAApp(QMainWindow):
             self.answer_text.ensureCursorVisible()
     
     def display_answer(self, question, answer):
+       """
+        Updates interface to display the answer for the inputted question
+        :param question: User question.
+        :param answer: Answer by AI model
+        :return:
+        """
         current_text = self.answer_text.toPlainText()
         if current_text.endswith("Thinking...\n"):
             text_lines = current_text.split('\n')
@@ -252,7 +285,6 @@ class DocumentQAApp(QMainWindow):
         self.answer_text.append(f"A: {answer}\n\n")
         self.answer_text.append("-" * 60 + "\n")
         self.answer_text.ensureCursorVisible()
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
