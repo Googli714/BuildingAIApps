@@ -100,6 +100,13 @@ class DocumentQAApp:
         self.question_entry.bind("<Return>", lambda event: self.answer_question())
 
     def load_document(self):
+        """
+        Allows user to pick a document and load it,
+        Extracts the text and stores the document chunks in the
+        database. Accepts only PDF or TXT files.
+
+        :return:
+        """
         home = Path.home()
         file_paths = filedialog.askopenfilenames(
             title="Select Document(s)",
@@ -137,12 +144,21 @@ class DocumentQAApp:
         self.ask_button.configure(state=NORMAL)
         self.question_entry.configure(state=NORMAL)
 
-    def retrieve_relevant_contexts(self, query, top_k=0.3):
+    def retrieve_relevant_contexts(self, query, top_k= 3):
+        """
+        Retrieves the most relevant chunks from the database
+
+        :param query: Input question from the user
+        :param top_k:
+        :return: A list of relevant document chunks, each containing:
+            - 'content' (str): The text content of the chunk.
+            - 'source' (str): The filename and page number.
+        """
         res = self.client.embeddings.create(input=query, model="text-embedding-3-large")
         embedding = res.data[0].embedding
         embedding = np.array(embedding)
 
-        relevant_docs = self.db.search(embedding, 3)
+        relevant_docs = self.db.search(embedding, top_k)
 
         top_docs = []
 
@@ -155,6 +171,13 @@ class DocumentQAApp:
         return top_docs
 
     def generate_answer(self, query, relevant_docs):
+        """
+         Generates an answer to the user's question using the provided document context.
+
+        :param query: The user's question.
+        :param relevant_docs:  List of relevant document chunks retrieved from the database
+        :return: The generated answer from the language model.
+        """
         context = "\n\n---\n\n".join([f"From {doc['source']}:\n{doc['content']}" for doc in relevant_docs])
         message = {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {query}"}
 
@@ -173,6 +196,10 @@ class DocumentQAApp:
         return answer
 
     def answer_question(self):
+        """
+        Encapsulates the flow of what the app does when a user asks a question.
+        :return:
+        """
         question = self.question_entry.get().strip()
 
         if not question:
@@ -196,6 +223,12 @@ class DocumentQAApp:
             self.answer_text.see("end")
 
     def display_answer(self, question, answer):
+        """
+        Updates interface to display the answer for the inputted question
+        :param question: User question.
+        :param answer: Answer by AI model
+        :return:
+        """
         self.answer_text.configure(state="normal")
         self.answer_text.delete("end-2l", "end")
         self.answer_text.insert("end", f"\n\nA: {answer}\n\n")
