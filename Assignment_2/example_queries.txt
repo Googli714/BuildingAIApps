@@ -1,0 +1,5 @@
+1. "What would the monthly payment be for a $300,000 mortgage at 4.5% interest for 30 years?"
+2. "Show me electronic products under $500"
+3. "What's the weather like in New York?"
+4. "Show me top 3 Hasbro products"
+5. "What's the weather like in New York and Georgia?"
