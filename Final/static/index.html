@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Intelligence Platform</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <script src="static/mainscript.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Meeting Intelligence Platform</h1>
+            <p class="subtitle">AI-powered meeting transcription, analysis, and insights</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('upload')">Upload Meeting</button>
+            <button class="tab" onclick="switchTab('meetings')">All Meetings</button>
+            <button class="tab" onclick="switchTab('search')">Search</button>
+            <button class="tab" onclick="switchTab('insights')">Insights</button>
+        </div>
+
+        <!-- Upload Tab -->
+        <div id="upload-tab" class="tab-content active">
+            <div class="card">
+                <h2>Create New Meeting</h2>
+                <form id="meeting-form">
+                    <div class="form-group">
+                        <label for="meeting-title">Meeting Title</label>
+                        <input type="text" id="meeting-title" required placeholder="e.g., Q3 Planning Session">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="meeting-date">Date</label>
+                        <input type="date" id="meeting-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="participants">Participants (comma-separated)</label>
+                        <input type="text" id="participants" required placeholder="e.g., John Smith, Sarah Johnson, Mike Chen">
+                    </div>
+
+                    <button type="submit" class="btn">Create Meeting</button>
+                </form>
+            </div>
+
+            <div class="card" id="upload-section" style="display: none;">
+                <h2>Upload Audio Recording</h2>
+                <div class="file-upload">
+                    <input type="file" id="audio-file" accept=".mp3,.wav,.m4a,.webm,.mp4">
+                    <label for="audio-file" class="file-upload-label">
+                        <svg width="50" height="50" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin: 0 auto;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p>Click to upload audio file (MP3, WAV, M4A, WEBM, MP4)</p>
+                        <p style="font-size: 0.875rem; color: #94a3b8;">Maximum file size: 25MB</p>
+                    </label>
+                </div>
+                <div id="file-selected" class="file-selected">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span id="selected-filename"></span>
+                </div>
+                <button class="btn" onclick="uploadAudio()" style="margin-top: 1rem;">Process Audio</button>
+            </div>
+        </div>
+
+        <!-- Meetings Tab -->
+        <div id="meetings-tab" class="tab-content">
+            <div class="card">
+                <h2>All Meetings</h2>
+                <div id="meetings-list" class="meeting-list">
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                        </svg>
+                        <p>No meetings yet. Upload your first recording!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Tab -->
+        <div id="search-tab" class="tab-content">
+            <div class="card">
+                <h2>Cross-Language Semantic Search</h2>
+                <p style="color: #64748b; margin-bottom: 1.5rem; font-size: 0.875rem;">
+                    🌍 Search in English or Georgian - results from both languages will be included automatically
+                </p>
+                <div class="search-box">
+                    <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Search in English or Georgian (ქართულად)..." onkeyup="if(event.key === 'Enter') searchMeetings()">
+                </div>
+                <button class="btn" onclick="searchMeetings()">Search</button>
+
+                <div id="search-results" style="margin-top: 2rem;"></div>
+            </div>
+        </div>
+
+        <!-- Insights Tab -->
+        <div id="insights-tab" class="tab-content">
+            <div class="card">
+                <h2>Cross-Meeting Insights</h2>
+                <div id="insights-content">
+                    <div class="empty-state">
+                        <p>Loading insights...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meeting Detail Modal -->
+    <div id="meeting-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeMeetingModal()">&times;</span>
+            <div id="meeting-detail"></div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <div id="delete-confirm-modal" class="modal" style="display: none;">
+        <div class="confirm-dialog">
+            <h3>Delete Meeting</h3>
+            <p id="delete-confirm-message"></p>
+            <div class="confirm-dialog-buttons">
+                <button class="btn btn-secondary" onclick="cancelDelete()">Cancel</button>
+                <button class="delete-btn" onclick="executeDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
